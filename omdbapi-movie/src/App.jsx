@@ -1,10 +1,11 @@
 import './App.css';
-import responseMovies from './mocks/results.json';
-import noResults from './mocks/no-Results.json';
+import { useMovies } from './hooks/useMovies';
+import { Movies } from './components/Movies';
+// OMDb API: http://www.omdbapi.com/?i=tt3896198&apikey=5acb29ce
 
 function App() {
-    const movies = responseMovies.Search
-    const hasMovies = movies?.lenght > 0
+    const { movies: mappedMovies } = useMovies();
+
     return (
         <div className="page">
             <header>
@@ -16,17 +17,7 @@ function App() {
             </header>
 
             <main>
-                <ul>
-                    {
-                        movies.map(movie =>(
-                            <li key={movie.imdbID}>
-                                <h3>{movie.Title}</h3>
-                                <p>{movie.Year}</p>
-                                <img src={movie.Poster} alt={movie.Title}></img>
-                            </li>
-                        ))
-                    }
-                </ul>
+                <Movies movies={mappedMovies} />
             </main>
         </div>
     )
