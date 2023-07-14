@@ -1,7 +1,8 @@
 import './App.css';
 import { useMovies } from './hooks/useMovies';
 import { Movies } from './components/Movies';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import debounce from 'just-debounce-it'
 
 function useSearch() {
     const [search, updateSearch] = useState('')
@@ -32,6 +33,16 @@ function App() {
     const { search, updateSearch, error } = useSearch();
     const { movies, loading, getMovies } = useMovies({ search, sort });
 
+    const debouncedGetMovies = useCallback(
+        //usamos debounce para que renderice la busqueda en cierto tiempo
+        //pero a su vez usamos useCallback porque si no se renderiza en cada cambio
+        debounce(search => {
+            console.log('search', search)
+            getMovies({ search })
+        }, 300)
+        , [getMovies]
+    ) 
+
     const handleSubmit = (event) => {
         event.preventDefault();
         getMovies({ search })
@@ -41,8 +52,12 @@ function App() {
         setSort(!sort)
     }
 
+    // cada vez que detecte un cambio en el input tambien sera en la busqueda
+    // dara resultados mientra escribamos
     const handleChange = (event) => {
-        updateSearch(event.target.value)
+        const newSearch = event.target.value
+        updateSearch(newSearch)
+        debouncedGetMovies(newSearch)
     }
 
     return (
