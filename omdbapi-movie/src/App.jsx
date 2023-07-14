@@ -34,7 +34,7 @@ function App() {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        getMovies()
+        getMovies({ search })
     }
     //funcion para ordenar movies por titulo
     const handleSort = () => {
