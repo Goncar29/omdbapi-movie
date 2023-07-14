@@ -1,38 +1,44 @@
 import './App.css';
 import { useMovies } from './hooks/useMovies';
 import { Movies } from './components/Movies';
-import { useEffect, useState } from 'react';
-// OMDb API: http://www.omdbapi.com/?i=tt3896198&apikey=5acb29ce
+import { useEffect, useRef, useState } from 'react';
 
-function App() {
-    const { movies } = useMovies();
-    const [query, setQuery] = useState('');
+function useSearch() {
+    const [search, updateSearch] = useState('')
     const [error, setError] = useState(null);
-
-    console.log('Render')
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        console.log({ query })
-    }
-
-    const handleChange = (event) => {
-        const newQuery = event.target.value
-        if (newQuery.startsWith(' ')) return
-        setQuery(event.target.value)
-    }
+    const isFirstInput = useRef(true)
 
     useEffect(() => {
-        if (query === '') {
+        if (isFirstInput.current) {
+            isFirstInput.current = search === ''
+            return
+        }// evitamos en el 1° render que salte la siguiente condicion de error del usuario usando useRef 
+        if (search === '') {
             setError('Nada que buscar')
             return
         }
-        if (query.length < 3) {
+        if (search.length < 3) {
             setError('Escribe mas de 3 caracteres')
             return
         }
         setError(null)
     })
+
+    return { search, updateSearch, error }
+}
+
+function App() {
+    const { search, updateSearch, error } = useSearch();
+    const { movies, loading, getMovies } = useMovies({ search });
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        getMovies()
+    }
+
+    const handleChange = (event) => {
+        updateSearch(event.target.value)
+    }
 
     return (
         <div className="page">
@@ -44,7 +50,7 @@ function App() {
                             border: '1px solid transparent',
                             borderColor: error ? 'red' : 'transparent'
                         }} 
-                        onChange={handleChange} value={query} name='query' 
+                        onChange={handleChange} value={search} name='query' 
                         placeholder="Avengers, Star Wars, Matrix ..." 
                     />
                     <button type="submit">Buscar</button>
@@ -53,7 +59,9 @@ function App() {
             </header>
 
             <main>
-                <Movies movies={movies} />
+                {
+                    loading ? <p>Caergando...</p> : <Movies movies={movies} />
+                }
             </main>
         </div>
     )
