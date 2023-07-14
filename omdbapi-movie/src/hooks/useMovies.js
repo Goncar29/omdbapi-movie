@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { searchMovies } from '../services/movies.js';
 
-export function useMovies ({ search }) { //custom hook para fetching de datos y el estado
+export function useMovies ({ search, sort }) { //custom hook para fetching de datos y el estado
     const [movies, setMovies] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
@@ -24,5 +24,9 @@ export function useMovies ({ search }) { //custom hook para fetching de datos y 
         }
     }
 
-    return { movies, getMovies, loading }
+    const sortedMovies = sort
+        ? [...movies].sort((a, b) => a.title.localeCompare(b.title))
+        : movies
+
+    return { movies: sortedMovies, getMovies, loading }
 }
